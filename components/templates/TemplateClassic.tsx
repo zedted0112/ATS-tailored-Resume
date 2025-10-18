@@ -77,7 +77,7 @@ const TemplateClassic: React.FC<TemplateProps> = ({ data, setData, isEditing }) 
             <SectionVisibilityToggle isEditing={isEditing} isVisible={isSectionVisible('experience')} onToggle={() => handleToggleSection('experience')} />
             <h2 className="text-base font-bold border-b border-black pb-1 mb-2">EXPERIENCE</h2>
             {(experience || []).map((exp, index) => (
-            <div key={index} className="mb-4 pdf-break-avoid">
+            <div key={index} className="mb-4">
                 <div className="flex justify-between">
                 <EditableField as="h3" isEditing={isEditing} value={exp.company} onSave={val => handleUpdate(p => ({ experience: p.experience.map((e, i) => i === index ? {...e, company: val} : e) }))} className="font-bold" />
                 <EditableField as="p" isEditing={isEditing} value={exp.location} onSave={val => handleUpdate(p => ({ experience: p.experience.map((e, i) => i === index ? {...e, location: val} : e) }))} />
@@ -101,7 +101,7 @@ const TemplateClassic: React.FC<TemplateProps> = ({ data, setData, isEditing }) 
             <SectionVisibilityToggle isEditing={isEditing} isVisible={isSectionVisible('projects')} onToggle={() => handleToggleSection('projects')} />
             <h2 className="text-base font-bold border-b border-black pb-1 mb-2">PROJECTS</h2>
             {(projects || []).map((proj, index) => (
-            <div key={index} className="mb-2 pdf-break-avoid">
+            <div key={index} className="mb-2">
                 <div className="flex justify-between">
                 <EditableField as="h3" isEditing={isEditing} value={proj.name} onSave={val => handleUpdate(p => ({ projects: p.projects.map((pr, i) => i === index ? {...pr, name: val} : pr) }))} className="font-bold" />
                 {proj.link && <EditableField as="p" isEditing={isEditing} value={proj.link} onSave={val => handleUpdate(p => ({ projects: p.projects.map((pr, i) => i === index ? {...pr, link: val} : pr) }))} className="italic" />}
@@ -120,7 +120,7 @@ const TemplateClassic: React.FC<TemplateProps> = ({ data, setData, isEditing }) 
             <SectionVisibilityToggle isEditing={isEditing} isVisible={isSectionVisible('education')} onToggle={() => handleToggleSection('education')} />
             <h2 className="text-base font-bold border-b border-black pb-1 mb-2">EDUCATION</h2>
             {(education || []).map((edu, index) => (
-            <div key={index} className="flex justify-between pdf-break-avoid">
+            <div key={index} className="flex justify-between">
                 <div>
                 <EditableField as="h3" isEditing={isEditing} value={edu.institution} onSave={val => handleUpdate(p => ({ education: p.education.map((ed, i) => i === index ? {...ed, institution: val} : ed) }))} className="font-bold" />
                 <EditableField as="p" isEditing={isEditing} value={edu.degree} onSave={val => handleUpdate(p => ({ education: p.education.map((ed, i) => i === index ? {...ed, degree: val} : ed) }))} />

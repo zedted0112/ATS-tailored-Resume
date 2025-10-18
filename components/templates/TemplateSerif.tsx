@@ -80,7 +80,7 @@ const TemplateSerif: React.FC<TemplateProps> = ({ data, setData, isEditing }) =>
                 <h2 className="text-lg font-bold border-b border-gray-400 pb-1 mb-2" style={{ fontFamily: "'Libre Baskerville', serif" }}>Experience</h2>
                 <div className="space-y-4">
                     {(experience || []).map((exp, index) => (
-                    <div key={index} className="pdf-break-avoid">
+                    <div key={index}>
                         <div className="flex justify-between">
                         <EditableField as="h3" isEditing={isEditing} value={exp.role} onSave={val => handleUpdate(p => ({ experience: p.experience.map((e, i) => i === index ? {...e, role: val} : e) }))} className="font-bold" />
                         <p className="font-bold"><EditableField as="span" isEditing={isEditing} value={exp.startDate} onSave={val => handleUpdate(p => ({ experience: p.experience.map((e, i) => i === index ? {...e, startDate: val} : e) }))} /> - <EditableField as="span" isEditing={isEditing} value={exp.endDate} onSave={val => handleUpdate(p => ({ experience: p.experience.map((e, i) => i === index ? {...e, endDate: val} : e) }))} /></p>
@@ -104,7 +104,7 @@ const TemplateSerif: React.FC<TemplateProps> = ({ data, setData, isEditing }) =>
                 <h2 className="text-lg font-bold border-b border-gray-400 pb-1 mb-2" style={{ fontFamily: "'Libre Baskerville', serif" }}>Projects</h2>
                 <div className="space-y-3">
                     {(projects || []).map((proj, index) => (
-                    <div key={index} className="pdf-break-avoid">
+                    <div key={index}>
                         <div className="flex justify-between">
                         <EditableField as="h3" isEditing={isEditing} value={proj.name} onSave={val => handleUpdate(p => ({ projects: p.projects.map((pr, i) => i === index ? {...pr, name: val} : pr) }))} className="font-bold" />
                         {proj.link && <EditableField as="span" isEditing={isEditing} value={proj.link} onSave={val => handleUpdate(p => ({ projects: p.projects.map((pr, i) => i === index ? {...pr, link: val} : pr) }))} className="italic hover:underline" />}
@@ -124,7 +124,7 @@ const TemplateSerif: React.FC<TemplateProps> = ({ data, setData, isEditing }) =>
                 <SectionVisibilityToggle isEditing={isEditing} isVisible={isSectionVisible('education')} onToggle={() => handleToggleSection('education')} />
                 <h2 className="text-lg font-bold border-b border-gray-400 pb-1 mb-2" style={{ fontFamily: "'Libre Baskerville', serif" }}>Education</h2>
                 {(education || []).map((edu, index) => (
-                <div key={index} className="flex justify-between pdf-break-avoid">
+                <div key={index} className="flex justify-between">
                     <div>
                     <EditableField as="h3" isEditing={isEditing} value={edu.institution} onSave={val => handleUpdate(p => ({ education: p.education.map((ed, i) => i === index ? {...ed, institution: val} : ed) }))} className="font-bold" />
                     <EditableField as="p" isEditing={isEditing} value={edu.degree} onSave={val => handleUpdate(p => ({ education: p.education.map((ed, i) => i === index ? {...ed, degree: val} : ed) }))} className="italic" />

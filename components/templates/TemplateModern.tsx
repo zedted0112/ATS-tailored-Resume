@@ -88,7 +88,7 @@ const TemplateModern: React.FC<TemplateProps> = ({ data, setData, isEditing }) =
           <SectionVisibilityToggle isEditing={isEditing} isVisible={isSectionVisible('experience')} onToggle={() => handleToggleSection('experience')} />
           <h2 className="text-sm font-bold uppercase tracking-wider text-indigo-700 border-b-2 border-indigo-200 pb-1 mb-3">Experience</h2>
           {(experience || []).map((exp, index) => (
-            <div key={index} className="mb-4 pdf-break-avoid">
+            <div key={index} className="mb-4">
               <div className="flex justify-between items-baseline">
                 <EditableField as="h3" isEditing={isEditing} value={exp.role} onSave={val => handleUpdate(p => ({ experience: p.experience.map((e, i) => i === index ? {...e, role: val} : e) }))} className="text-base font-semibold text-gray-900" />
                 <div className="text-xs font-medium text-gray-500">
@@ -114,7 +114,7 @@ const TemplateModern: React.FC<TemplateProps> = ({ data, setData, isEditing }) =
           <SectionVisibilityToggle isEditing={isEditing} isVisible={isSectionVisible('projects')} onToggle={() => handleToggleSection('projects')} />
           <h2 className="text-sm font-bold uppercase tracking-wider text-indigo-700 border-b-2 border-indigo-200 pb-1 mb-3">Projects</h2>
           {(projects || []).map((proj, index) => (
-            <div key={index} className="mb-4 pdf-break-avoid">
+            <div key={index} className="mb-4">
               <div className="flex justify-between items-baseline">
                 <EditableField as="h3" isEditing={isEditing} value={proj.name} onSave={val => handleUpdate(p => ({ projects: p.projects.map((pr, i) => i === index ? {...pr, name: val} : pr) }))} className="text-base font-semibold text-gray-900" />
                 {proj.link && <EditableField as="span" isEditing={isEditing} value={proj.link} onSave={val => handleUpdate(p => ({ projects: p.projects.map((pr, i) => i === index ? {...pr, link: val} : pr) }))} className="text-xs text-indigo-600 hover:underline" />}
@@ -135,7 +135,7 @@ const TemplateModern: React.FC<TemplateProps> = ({ data, setData, isEditing }) =
           <SectionVisibilityToggle isEditing={isEditing} isVisible={isSectionVisible('education')} onToggle={() => handleToggleSection('education')} />
           <h2 className="text-sm font-bold uppercase tracking-wider text-indigo-700 border-b-2 border-indigo-200 pb-1 mb-3">Education</h2>
           {(education || []).map((edu, index) => (
-            <div key={index} className="flex justify-between items-baseline pdf-break-avoid">
+            <div key={index} className="flex justify-between items-baseline">
               <div>
                 <EditableField as="h3" isEditing={isEditing} value={edu.institution} onSave={val => handleUpdate(p => ({ education: p.education.map((ed, i) => i === index ? {...ed, institution: val} : ed) }))} className="text-base font-semibold text-gray-900" />
                 <EditableField as="p" isEditing={isEditing} value={edu.degree} onSave={val => handleUpdate(p => ({ education: p.education.map((ed, i) => i === index ? {...ed, degree: val} : ed) }))} className="text-sm text-gray-700" />

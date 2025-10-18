@@ -1,231 +1,253 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import type { ResumeData, AtsResult, TailorResult } from '../types';
+import type { ResumeData, AtsFeedbackItem, TailorResult } from '../types';
 
-const blankResumeData: ResumeData = {
-  personalInfo: { name: '', email: '', phone: '', linkedin: '', github: '', website: '', location: '' },
-  summary: '',
-  experience: [],
-  education: [],
-  skills: [],
-  projects: [],
-  hiddenSections: []
-};
+const ai = new GoogleGenAI({apiKey: process.env.API_KEY!});
 
-
-export const parseResumeWithGemini = async (resumeText: string): Promise<ResumeData> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: `Based on the provided schema, parse the following resume text into a JSON object.
-
-Resume Text:
----
-${resumeText}
----
-`,
-    config: {
-      systemInstruction: `You are a highly precise resume parsing engine. Your ONLY function is to extract information from a resume and fit it into a given JSON schema.
-
-**CRITICAL RULES:**
-1.  **STRICT ADHERENCE TO SCHEMA:** You MUST follow the provided JSON schema exactly.
-2.  **ISOLATE THE SUMMARY:** The 'summary' field is ONLY for a brief, introductory professional summary or objective statement. It should be a single, short paragraph.
-3.  **ABSOLUTE PROHIBITION:** Under NO circumstances should you place the entire resume content, or content from other sections like 'Experience' or 'Skills', into the 'summary' field. This is a critical failure.
-4.  **SEPARATE SECTIONS:** Each section (summary, experience, skills, education, projects) is distinct and MUST be parsed independently. Do not merge them.
-5.  **HANDLE MISSING SECTIONS:** If a section does not exist in the resume, you MUST return an empty value for it (e.g., an empty string "" or an empty array []).
-6.  **DISCARD UNKNOWN TEXT:** If you find text that does not clearly belong to any section in the schema, discard it. Do NOT add it to the summary or any other field.`,
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          personalInfo: {
+const resumeSchema = {
+    type: Type.OBJECT,
+    properties: {
+        personalInfo: {
             type: Type.OBJECT,
             properties: {
-              name: { type: Type.STRING, description: "Full name" },
-              email: { type: Type.STRING, description: "Email address" },
-              phone: { type: Type.STRING, description: "Phone number" },
-              linkedin: { type: Type.STRING, description: "LinkedIn profile URL or handle" },
-              github: { type: Type.STRING, description: "GitHub profile URL or handle" },
-              website: { type: Type.STRING, description: "Personal website or portfolio URL" },
-              location: { type: Type.STRING, description: "City and State, e.g., San Francisco, CA" },
-            },
-          },
-          summary: {
-            type: Type.STRING,
-            description: "A professional summary or objective statement.",
-          },
-          experience: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                company: { type: Type.STRING },
-                role: { type: Type.STRING },
+                name: { type: Type.STRING },
+                email: { type: Type.STRING },
+                phone: { type: Type.STRING },
+                linkedin: { type: Type.STRING },
+                github: { type: Type.STRING },
+                website: { type: Type.STRING },
                 location: { type: Type.STRING },
-                startDate: { type: Type.STRING },
-                endDate: { type: Type.STRING, description: "e.g., 'Present' or 'Dec 2020'" },
-                description: {
-                  type: Type.ARRAY,
-                  items: { type: Type.STRING },
-                },
-              },
             },
-          },
-          education: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                institution: { type: Type.STRING },
-                degree: { type: Type.STRING },
-                location: { type: Type.STRING },
-                graduationDate: { type: Type.STRING },
-              },
-            },
-          },
-          skills: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING },
-            description: "A list of technical and soft skills."
-          },
-          projects: {
-            type: Type.ARRAY,
-            items: {
-                type: Type.OBJECT,
-                properties: {
-                    name: {type: Type.STRING},
-                    description: {
-                        type: Type.ARRAY,
-                        items: { type: Type.STRING },
-                    },
-                    technologies: {
-                        type: Type.ARRAY,
-                        items: { type: Type.STRING },
-                    },
-                    link: {type: Type.STRING, description: "URL to the project or repository"}
-                }
-            }
-          }
+            required: ['name', 'email', 'phone', 'location']
         },
-      },
+        summary: { type: Type.STRING },
+        experience: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    company: { type: Type.STRING },
+                    role: { type: Type.STRING },
+                    location: { type: Type.STRING },
+                    startDate: { type: Type.STRING },
+                    endDate: { type: Type.STRING },
+                    description: { type: Type.ARRAY, items: { type: Type.STRING } },
+                },
+                required: ['company', 'role', 'startDate', 'endDate', 'description']
+            }
+        },
+        education: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    institution: { type: Type.STRING },
+                    degree: { type: Type.STRING },
+                    location: { type: Type.STRING },
+                    graduationDate: { type: Type.STRING },
+                },
+                required: ['institution', 'degree', 'graduationDate']
+            }
+        },
+        skills: {
+            type: Type.ARRAY,
+            items: { type: Type.STRING }
+        },
+        projects: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    name: { type: Type.STRING },
+                    description: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    technologies: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    link: { type: Type.STRING },
+                },
+                required: ['name', 'description', 'technologies']
+            }
+        }
     },
-  });
-
-  const jsonString = response.text.trim();
-  let parsedJson: Partial<ResumeData>;
-  try {
-      parsedJson = JSON.parse(jsonString);
-  } catch (e) {
-      console.error("Gemini returned invalid JSON:", jsonString);
-      throw new Error("The AI failed to return a valid resume structure. Please try again.");
-  }
-
-  // Merge with defaults to ensure all keys exist and prevent crashes from malformed AI responses.
-  const robustData: ResumeData = {
-      ...blankResumeData,
-      ...parsedJson,
-      personalInfo: {
-          ...blankResumeData.personalInfo,
-          ...(parsedJson.personalInfo || {})
-      },
-      summary: parsedJson.summary || '',
-      experience: parsedJson.experience || [],
-      education: parsedJson.education || [],
-      skills: parsedJson.skills || [],
-      projects: parsedJson.projects || [],
-  };
-
-  return robustData;
+    required: ['personalInfo', 'summary', 'experience', 'education', 'skills']
 };
 
 
-export const getAtsScoreWithGemini = async (resumeText: string): Promise<AtsResult> => {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: `Analyze the following resume text from the perspective of an Applicant Tracking System (ATS). Provide a score out of 100 and give 3-5 brief, actionable feedback points for improvement. Focus on formatting, keywords, and clarity that would make it more ATS-friendly.
+export const parseResume = async (text: string): Promise<ResumeData> => {
+    const systemInstruction = `You are an expert resume parsing AI. Your task is to accurately convert resume text into a structured JSON object based on the provided schema. Follow these rules strictly:
+1.  **Section Integrity**: Correctly identify the boundaries for each major section (Summary, Experience, Projects, Education, Skills).
+2.  **Project Parsing**: A project entry starts with a distinct title, often bolded or larger, and may be followed by a URL. All subsequent bullet points or descriptive paragraphs belong to THAT ONE project. Do not create new, separate project entries from bullet points within a single project's description. A new project only begins when you encounter another distinct project title.
+3.  **Bullet Points**: For 'experience' and 'projects', correctly parse multi-line descriptions into an array of strings, with each string representing one bullet point or a single descriptive line.
+4.  **Completeness**: Extract all available information for every field defined in the schema. If a section is not present in the resume, provide an empty array or empty string for it.`;
 
-Resume Text:
----
-${resumeText}
----
-`,
+    const prompt = `Parse the following resume text into a structured JSON object according to your instructions.
+    
+    Resume Text:
+    ---
+    ${text}
+    ---
+    `;
+    
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-pro',
+        contents: prompt,
         config: {
+            systemInstruction: systemInstruction,
             responseMimeType: "application/json",
-            responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                    score: {
-                        type: Type.INTEGER,
-                        description: "An ATS-friendliness score from 0 to 100."
-                    },
-                    feedback: {
-                        type: Type.ARRAY,
-                        items: { type: Type.STRING },
-                        description: "An array of brief, actionable tips to improve the ATS score."
-                    }
-                }
-            }
+            responseSchema: resumeSchema
         }
     });
 
-    const jsonString = response.text.trim();
-    const parsedJson = JSON.parse(jsonString);
-    return parsedJson as AtsResult;
+    try {
+        const jsonText = response.text.trim();
+        const parsedData = JSON.parse(jsonText);
+        return parsedData as ResumeData;
+    } catch (e) {
+        console.error("Error parsing resume JSON from Gemini:", e);
+        console.error("Raw response:", response.text);
+        throw new Error("Failed to parse the resume structure from the AI response.");
+    }
 };
 
-export const tailorResumeForJob = async (resumeText: string, jobDescription: string): Promise<TailorResult> => {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: `Analyze the following resume against the provided job description. Provide specific, actionable suggestions to tailor the resume for this job application.
-
-Resume Text:
----
-${resumeText}
----
-
-Job Description:
----
-${jobDescription}
----
-`,
-        config: {
-            systemInstruction: `You are an expert career coach and resume writer. Your task is to help a job seeker tailor their resume to a specific job description.
-1.  **Rewrite the Summary:** Create a new professional summary that is concise (2-4 sentences) and directly incorporates key requirements and language from the job description.
-2.  **Identify Missing Keywords:** List critical keywords and skills from the job description that are not present in the resume.
-3.  **Enhance Experience Bullets:** Select up to three bullet points from the resume's experience section and rewrite them to better align with the responsibilities and desired qualifications mentioned in the job description. Use quantifiable achievements where possible.
-Your response MUST be in the specified JSON format.`,
-            responseMimeType: "application/json",
-            responseSchema: {
+const atsFeedbackSchema = {
+    type: Type.ARRAY,
+    items: {
+        type: Type.OBJECT,
+        properties: {
+            description: { type: Type.STRING, description: "A concise description of the issue and the suggested improvement." },
+            action: {
                 type: Type.OBJECT,
                 properties: {
-                    suggestedSummary: {
-                        type: Type.STRING,
-                        description: "A rewritten professional summary tailored to the job description."
-                    },
-                    missingKeywords: {
-                        type: Type.ARRAY,
-                        items: { type: Type.STRING },
-                        description: "A list of important keywords from the job description missing in the resume."
-                    },
-                    experienceSuggestions: {
-                        type: Type.ARRAY,
-                        items: {
-                            type: Type.OBJECT,
-                            properties: {
-                                original: { type: Type.STRING, description: "The original bullet point from the resume." },
-                                suggestion: { type: Type.STRING, description: "The improved, tailored bullet point." }
-                            },
-                             required: ["original", "suggestion"]
+                    type: { type: Type.STRING, description: "The type of action to perform: 'REPLACE_FIELD', 'ADD_TO_ARRAY', or 'REPLACE_IN_ARRAY'." },
+                    payload: {
+                        type: Type.OBJECT,
+                        properties: {
+                            section: { type: Type.STRING, description: "The top-level key in the resume data to modify (e.g., 'summary', 'experience')." },
+                            field: { type: Type.STRING, description: "The specific field to modify within a section item." },
+                            index: { type: Type.NUMBER, description: "The index of the item in a section array (e.g., for 'experience')." },
+                            descriptionIndex: { type: Type.NUMBER, description: "The index for a description bullet point inside an experience or project item." },
+                            original: { type: Type.STRING, description: "The original text to be replaced." },
+                            suggestion: { type: Type.STRING, description: "The new suggested text." },
                         },
-                        description: "Suggestions for rewriting experience bullet points."
+                        required: ['section', 'suggestion']
                     }
-                }
+                },
+                required: ['type', 'payload']
             }
+        },
+        required: ['description', 'action']
+    }
+};
+
+export const getAtsFeedback = async (resumeData: ResumeData): Promise<AtsFeedbackItem[]> => {
+    const prompt = `You are an expert ATS analyst and senior career coach. Your goal is to provide up to 10 specific, high-impact, actionable feedback items to help this resume pass automated systems AND impress human recruiters.
+
+    Analyze the provided resume JSON. For each issue you find, create a feedback item with a clear description and a programmatic action to fix it.
+
+    **CRITICAL RULES:**
+    1.  **NO GENERIC ADVICE IN SUGGESTIONS:** Do not give vague advice like "Quantify achievements." Your role is to DO IT for the user.
+    2.  **REWRITE, DON'T ADVISE:** For any suggestion involving text change, you MUST rewrite the user's actual bullet points. The 'suggestion' field in your payload MUST be the complete, rewritten sentence. The 'description' field should explain WHY you made the change (e.g., "Strengthened this bullet with a quantifiable result.").
+    3.  **ACTION-ORIENTED:** Every piece of feedback must be something the user can apply with one click.
+    4.  **EXACT MATCHING:** The 'original' field in your payload MUST EXACTLY match the text from the resume data. This is critical for the programmatic replacement to work.
+    5.  **FOCUS ON IMPACT:** Prioritize feedback that makes the candidate look more accomplished and results-oriented. Use the STAR (Situation, Task, Action, Result) method as inspiration.
+
+    **Example of perfect feedback:**
+    - Description: "This rewrite quantifies the impact of your work by highlighting a measurable outcome, which is highly effective."
+    - Action: { type: 'REPLACE_IN_ARRAY', payload: { section: 'experience', index: 0, descriptionIndex: 1, original: 'Developed a new feature for the main application.', suggestion: 'Spearheaded the development of a new user account feature, resulting in a 15% increase in user retention over three months.' } }
+
+    Resume JSON:
+    ---
+    ${JSON.stringify(resumeData, null, 2)}
+    ---
+    `;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: atsFeedbackSchema
         }
     });
 
-    const jsonString = response.text.trim();
-    return JSON.parse(jsonString) as TailorResult;
+    try {
+        const jsonText = response.text.trim();
+        const feedback = JSON.parse(jsonText);
+        return feedback as AtsFeedbackItem[];
+    } catch (e) {
+        console.error("Error parsing ATS feedback JSON from Gemini:", e);
+        console.error("Raw response:", response.text);
+        throw new Error("Failed to parse ATS feedback from the AI response.");
+    }
+};
+
+const tailorResultSchema = {
+    type: Type.OBJECT,
+    properties: {
+        summarySuggestion: { type: Type.STRING },
+        missingKeywords: { type: Type.ARRAY, items: { type: Type.STRING } },
+        experienceSuggestions: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    original: { type: Type.STRING },
+                    suggestion: { type: Type.STRING },
+                    experienceIndex: { type: Type.NUMBER },
+                    descriptionIndex: { type: Type.NUMBER },
+                },
+                required: ['original', 'suggestion', 'experienceIndex', 'descriptionIndex']
+            }
+        },
+        projectSuggestions: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    original: { type: Type.STRING },
+                    suggestion: { type: Type.STRING },
+                    projectIndex: { type: Type.NUMBER },
+                    descriptionIndex: { type: Type.NUMBER },
+                },
+                required: ['original', 'suggestion', 'projectIndex', 'descriptionIndex']
+            }
+        }
+    },
+    required: ['summarySuggestion', 'missingKeywords', 'experienceSuggestions', 'projectSuggestions']
+};
+
+export const tailorResume = async (resumeData: ResumeData, jobDescription: string): Promise<TailorResult> => {
+    const prompt = `You are an expert resume writer. Your task is to tailor the provided resume to the given job description.
+    1.  Identify important keywords from the job description that are missing from the resume's skills section.
+    2.  Rewrite the resume summary to be more aligned with the job description.
+    3.  Suggest improvements for the work experience and project description bullet points to better match the job's requirements, using keywords from the description where appropriate.
+
+    Resume JSON:
+    ---
+    ${JSON.stringify(resumeData, null, 2)}
+    ---
+
+    Job Description:
+    ---
+    ${jobDescription}
+    ---
+
+    Provide the output in a structured JSON format.
+    `;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-pro',
+        contents: prompt,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: tailorResultSchema
+        }
+    });
+
+    try {
+        const jsonText = response.text.trim();
+        const result = JSON.parse(jsonText);
+        return result as TailorResult;
+    } catch (e) {
+        console.error("Error parsing tailor result JSON from Gemini:", e);
+        console.error("Raw response:", response.text);
+        throw new Error("Failed to parse tailoring suggestions from the AI response.");
+    }
 };

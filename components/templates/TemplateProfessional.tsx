@@ -1,17 +1,16 @@
-
-
 import React from 'react';
 import type { ResumeData, ResumeSection } from '../../types';
 import { TemplateProps } from '../ResumePreview';
 import { EyeIcon, EyeOffIcon } from '../icons';
 
-const EditableField: React.FC<{ isEditing?: boolean; value: string; onSave: (newValue: string) => void, className?: string; as?: 'div' | 'p' | 'span' | 'h1' | 'h3' | 'li' }> = ({ isEditing, value, onSave, className, as: Component = 'div' }) => {
+const EditableField: React.FC<{ isEditing?: boolean; value: string; onSave: (newValue: string) => void, className?: string; as?: 'div' | 'p' | 'span' | 'h1' | 'h3' | 'li' | 'a'; href?: string; target?: string; rel?: string }> = ({ isEditing, value, onSave, className, as: Component = 'div', ...props }) => {
     return (
         <Component
             contentEditable={isEditing}
             suppressContentEditableWarning
             onBlur={(e) => onSave(e.currentTarget.innerText)}
             className={`${className} ${isEditing ? 'ring-1 ring-indigo-300 rounded-sm px-1' : ''}`}
+            {...props}
         >
             {value}
         </Component>
@@ -82,7 +81,7 @@ const TemplateProfessional: React.FC<TemplateProps> = ({ data, setData, isEditin
           <SectionVisibilityToggle isEditing={isEditing} isVisible={isSectionVisible('experience')} onToggle={() => handleToggleSection('experience')} />
           <h2 className="text-sm font-bold uppercase tracking-widest text-gray-600 border-b border-gray-200 pb-1 mb-2">Experience</h2>
           {(experience || []).map((exp, index) => (
-            <div key={index} className="mb-4 pdf-break-avoid">
+            <div key={index} className="mb-4">
               <div className="flex justify-between items-baseline">
                 <div className="font-bold text-base text-gray-800">
                     <EditableField as="span" isEditing={isEditing} value={exp.role} onSave={val => handleUpdate(p => ({ experience: p.experience.map((e, i) => i === index ? {...e, role: val} : e) }))} />
@@ -107,13 +106,19 @@ const TemplateProfessional: React.FC<TemplateProps> = ({ data, setData, isEditin
           <SectionVisibilityToggle isEditing={isEditing} isVisible={isSectionVisible('projects')} onToggle={() => handleToggleSection('projects')} />
           <h2 className="text-sm font-bold uppercase tracking-widest text-gray-600 border-b border-gray-200 pb-1 mb-2">Projects</h2>
           {(projects || []).map((proj, index) => (
-            <div key={index} className="mb-4 pdf-break-avoid">
-               <div className="font-bold text-base text-gray-800">
-                    <EditableField as="span" isEditing={isEditing} value={proj.name} onSave={val => handleUpdate(p => ({ projects: p.projects.map((pr, i) => i === index ? {...pr, name: val} : pr) }))} />
+            <div key={index} className="mb-4">
+               <div className="flex justify-between items-baseline">
+                    <EditableField as="h3" isEditing={isEditing} value={proj.name} onSave={val => handleUpdate(p => ({ projects: p.projects.map((pr, i) => i === index ? {...pr, name: val} : pr) }))} className="font-bold text-base text-gray-800" />
+                    {proj.link && <EditableField as="a" href={proj.link.startsWith('http') ? proj.link : `https://${proj.link}`} target="_blank" rel="noopener noreferrer" isEditing={isEditing} value={proj.link} onSave={val => handleUpdate(p => ({ projects: p.projects.map((pr, i) => i === index ? {...pr, link: val} : pr) }))} className="text-xs text-indigo-600 hover:underline" />}
                 </div>
               <ul className="list-disc list-inside mt-1 text-gray-700 space-y-1">
                 {(proj.description || []).map((desc, i) => <EditableField as="li" key={i} isEditing={isEditing} value={desc} onSave={val => handleUpdate(p => ({ projects: p.projects.map((pr, idx) => idx === index ? {...pr, description: pr.description.map((d, didx) => didx === i ? val : d)} : pr) }))} />)}
               </ul>
+              {(proj.technologies && proj.technologies.length > 0) && (
+                <p className="text-xs text-gray-600 italic mt-2">
+                  <strong>Technologies:</strong> <EditableField as="span" isEditing={isEditing} value={(proj.technologies || []).join(', ')} onSave={val => handleUpdate(p => ({ projects: p.projects.map((pr, i) => i === index ? {...pr, technologies: val.split(',').map(t => t.trim())} : pr) }))} />
+                </p>
+              )}
             </div>
           ))}
         </section>
@@ -124,7 +129,7 @@ const TemplateProfessional: React.FC<TemplateProps> = ({ data, setData, isEditin
           <SectionVisibilityToggle isEditing={isEditing} isVisible={isSectionVisible('education')} onToggle={() => handleToggleSection('education')} />
           <h2 className="text-sm font-bold uppercase tracking-widest text-gray-600 border-b border-gray-200 pb-1 mb-2">Education</h2>
           {(education || []).map((edu, index) => (
-            <div key={index} className="flex justify-between items-baseline pdf-break-avoid">
+            <div key={index} className="flex justify-between items-baseline">
               <div>
                 <EditableField as="h3" isEditing={isEditing} value={edu.institution} onSave={val => handleUpdate(p => ({ education: p.education.map((ed, i) => i === index ? {...ed, institution: val} : ed) }))} className="font-bold text-base text-gray-800" />
                 <EditableField as="p" isEditing={isEditing} value={edu.degree} onSave={val => handleUpdate(p => ({ education: p.education.map((ed, i) => i === index ? {...ed, degree: val} : ed) }))} className="text-gray-600" />

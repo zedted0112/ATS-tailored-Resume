@@ -40,7 +40,8 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ data, setData, template, 
           {Object.values(Template).map(t => (
             <button
               key={t}
-              onClick={() => setTemplate(t)}
+              // Fix: Add type assertion `as Template` to resolve type inference issues with string enums.
+              onClick={() => setTemplate(t as Template)}
               className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${template === t ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
             >
               {t}

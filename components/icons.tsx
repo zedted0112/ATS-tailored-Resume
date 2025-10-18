@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 export const UploadIcon: React.FC<{className?: string}> = ({ className }) => (
@@ -34,7 +33,7 @@ export const EyeIcon: React.FC<{className?: string}> = ({ className }) => (
 
 export const EyeOffIcon: React.FC<{className?: string}> = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a10.05 10.05 0 013.56-5.423m5.21-1.405a9.96 9.96 0 013.313.917M3 3l18 18" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a10.05 10.05 0 013.56-5.423m5.21-1.405a9.96 9.96 0 013.313 .917M3 3l18 18" />
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
 );
@@ -44,4 +43,22 @@ export const SparklesIcon: React.FC<{className?: string}> = ({ className }) => (
         <path strokeLinecap="round" strokeLinejoin="round" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 004.463-1.447.75.75 0 01.98.814A10.503 10.503 0 0118 19.5a10.5 10.5 0 01-10.5-10.5A10.503 10.503 0 019.528 1.718z" />
         <path strokeLinecap="round" strokeLinejoin="round" d="M12.122 12.122a.75.75 0 011.06 0l2.122 2.122a.75.75 0 010 1.06l-2.122 2.122a.75.75 0 01-1.06 0l-2.122-2.122a.75.75 0 010-1.06l2.122-2.122zM15.122 15.122a.75.75 0 011.06 0l2.122 2.122a.75.75 0 010 1.06l-2.122 2.122a.75.75 0 01-1.06 0l-2.122-2.122a.75.75 0 010-1.06l2.122-2.122z" />
     </svg>
+);
+
+export const PlusIcon: React.FC<{className?: string}> = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+  </svg>
+);
+
+export const CheckIcon: React.FC<{className?: string}> = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+  </svg>
+);
+
+export const RefreshIcon: React.FC<{className?: string}> = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0011.667 0l3.181-3.183m-4.991-2.691L7.985 5.644m0 0l-3.182 3.182m3.182-3.182v4.992" />
+  </svg>
 );

@@ -20,7 +20,7 @@ export interface WorkExperience {
 export interface Education {
   institution: string;
   degree: string;
-  location:string;
+  location: string;
   graduationDate: string;
 }
 
@@ -31,7 +31,7 @@ export interface Project {
     link: string;
 }
 
-export type ResumeSection = 'summary' | 'skills' | 'experience' | 'projects' | 'education';
+export type ResumeSection = 'summary' | 'experience' | 'education' | 'skills' | 'projects';
 
 export interface ResumeData {
   personalInfo: PersonalInfo;
@@ -44,24 +44,52 @@ export interface ResumeData {
 }
 
 export enum Template {
-  PROFESSIONAL = 'Professional',
-  MODERN = 'Modern',
-  CLASSIC = 'Classic',
-  SERIF = 'Serif'
+    PROFESSIONAL = 'Professional',
+    MODERN = 'Modern',
+    CLASSIC = 'Classic',
+    SERIF = 'Serif',
 }
 
-export interface AtsResult {
-  score: number;
-  feedback: string[];
-}
+export type AtsActionType = 'REPLACE_FIELD' | 'ADD_TO_ARRAY' | 'REPLACE_IN_ARRAY';
 
-export interface TailorSuggestion {
-    original: string;
+export interface AtsActionPayload {
+    section: keyof ResumeData | 'personalInfo';
+    field?: keyof PersonalInfo | keyof WorkExperience | keyof Education | keyof Project | 'description';
+    index?: number;
+    descriptionIndex?: number;
+    original?: string;
     suggestion: string;
 }
 
+export interface AtsAction {
+    type: AtsActionType;
+    payload: AtsActionPayload;
+}
+
+export interface AtsFeedbackItem {
+  description: string;
+  action: AtsAction;
+}
+
+// Types for interactive resume tailoring
+export interface TailorSuggestion {
+    original: string;
+    suggestion: string;
+    experienceIndex?: number;
+    descriptionIndex?: number;
+    projectIndex?: number;
+}
+
 export interface TailorResult {
-  suggestedSummary: string;
-  missingKeywords: string[];
-  experienceSuggestions: TailorSuggestion[];
+    summarySuggestion: string;
+    missingKeywords: string[];
+    experienceSuggestions: TailorSuggestion[];
+    projectSuggestions: TailorSuggestion[];
+}
+
+export interface AppliedTailorSuggestions {
+    summary: boolean;
+    keywords: string[];
+    experience: string[]; 
+    projects: string[];
 }
