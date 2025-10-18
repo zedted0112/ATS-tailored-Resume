@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ATS Resume Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url('https://rsms.me/inter/inter.css');
+      html { font-family: 'Inter', sans-serif; }
+      body {
+        background: linear-gradient(180deg, #f7f9fc 0%, #ffffff 400px);
+        min-height: 100vh;
+      }
+      
+      /* Loading Spinner Animation */
+      .loader {
+        border: 5px solid #E2E8F0; /* slate-200 */
+        border-top: 5px solid #3b82f6; /* blue-500 */
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      /* Template Editing Styles */
+      .editable-section {
+        position: relative;
+        padding-top: 24px; /* Space for the toggle */
+      }
+       .editable-section .section-toggle {
+        display: none;
+        position: absolute;
+        top: 0px;
+        left: -28px;
+        cursor: pointer;
+        background-color: #e0e7ff;
+        border-radius: 50%;
+        padding: 2px;
+        color: #4f46e5;
+      }
+       .editable-section:hover .section-toggle {
+        display: block;
+      }
+      [contenteditable="true"] {
+        outline: 2px solid transparent;
+        transition: outline 0.2s ease-in-out;
+      }
+      [contenteditable="true"]:hover,
+      [contenteditable="true"]:focus {
+        outline-color: #93c5fd; /* blue-300 */
+        background-color: #eff6ff; /* blue-50 */
+        border-radius: 2px;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.25.0"
+  }
+}
+</script>
+</head>
+  <body class="bg-slate-50 text-slate-800">
+    <div id="root"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
