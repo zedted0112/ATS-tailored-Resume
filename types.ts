@@ -1,3 +1,4 @@
+
 export interface PersonalInfo {
   name: string;
   email: string;
@@ -11,7 +12,7 @@ export interface PersonalInfo {
 export interface WorkExperience {
   company: string;
   role: string;
-  location: string;
+  location:string;
   startDate: string;
   endDate: string;
   description: string[];
@@ -22,16 +23,24 @@ export interface Education {
   degree: string;
   location: string;
   graduationDate: string;
+  cgpa?: string;
 }
 
 export interface Project {
     name: string;
+    role?: string;
     description: string[];
     technologies: string[];
     link: string;
+    date?: string;
 }
 
-export type ResumeSection = 'summary' | 'experience' | 'education' | 'skills' | 'projects';
+export interface Certification {
+    name: string;
+    date: string;
+}
+
+export type ResumeSection = 'summary' | 'experience' | 'education' | 'skills' | 'projects' | 'coursework' | 'certifications';
 
 export interface ResumeData {
   personalInfo: PersonalInfo;
@@ -40,6 +49,8 @@ export interface ResumeData {
   education: Education[];
   skills: string[];
   projects: Project[];
+  coursework?: string[];
+  certifications?: Certification[];
   hiddenSections?: ResumeSection[];
 }
 
@@ -92,4 +103,33 @@ export interface AppliedTailorSuggestions {
     keywords: string[];
     experience: string[]; 
     projects: string[];
+}
+
+// Types for AI Interview Coach
+export interface InterviewQuestion {
+  question: string;
+  sampleAnswer: string;
+  tip: string;
+  interviewerInsight: string;
+}
+
+// Types for Advanced Coaching
+export interface GroundingSource {
+  uri: string;
+  title: string;
+}
+
+export interface CompanyBriefing {
+  content: string; // Markdown content
+  sources: GroundingSource[];
+}
+
+// Fix: Add Job interface for SmartJobSearch component
+// Types for Smart Job Search
+export interface Job {
+  title: string;
+  company: string;
+  location: string;
+  matchReason: string;
+  url: string;
 }

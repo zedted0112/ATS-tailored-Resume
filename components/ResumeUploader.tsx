@@ -1,15 +1,55 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { UploadIcon } from './icons';
 
 interface ResumeUploaderProps {
   onUpload: (text: string) => void;
 }
 
+const animatedDescriptions = [
+  "Navigate your next career move with intelligent analysis.",
+  "Perfect your resume to beat automated screeners.",
+  "Get personalized interview questions and expert answers.",
+  "Tailor your application for any job in seconds.",
+  "Start your mission by uploading your resume."
+];
+
 const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onUpload }) => {
-  const [resumeText, setResumeText] = useState('');
   const [isProcessingFile, setIsProcessingFile] = useState(false);
   const [fileName, setFileName] = useState('');
   const [isDragging, setIsDragging] = useState(false);
+
+  // State for typing animation
+  const [descriptionIndex, setDescriptionIndex] = useState(0);
+  const [displayedText, setDisplayedText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const fullText = animatedDescriptions[descriptionIndex];
+    
+    const handleTyping = () => {
+      if (isDeleting) {
+        if (displayedText.length > 0) {
+          setDisplayedText(prev => prev.substring(0, prev.length - 1));
+        } else {
+          setIsDeleting(false);
+          setDescriptionIndex(prev => (prev + 1) % animatedDescriptions.length);
+        }
+      } else {
+        if (displayedText.length < fullText.length) {
+          setDisplayedText(prev => fullText.substring(0, prev.length + 1));
+        } else {
+          // Pause before deleting
+          setTimeout(() => setIsDeleting(true), 2500);
+        }
+      }
+    };
+
+    const typingSpeed = isDeleting ? 50 : 100;
+    const timeout = setTimeout(handleTyping, typingSpeed);
+
+    return () => clearTimeout(timeout);
+  }, [displayedText, isDeleting, descriptionIndex]);
+
 
   const processFile = async (file: File) => {
     setIsProcessingFile(true);
@@ -34,7 +74,9 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onUpload }) => {
       } else {
         text = await file.text();
       }
-      setResumeText(text);
+      if (text.trim()) {
+        onUpload(text);
+      }
     } catch (error) {
         console.error("Error processing file:", error);
         alert(`Sorry, there was an error reading that file. ${error instanceof Error ? error.message : "An unknown error occurred."}`);
@@ -50,12 +92,6 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onUpload }) => {
     }
   };
 
-  const handleParse = () => {
-    if (resumeText.trim()) {
-      onUpload(resumeText);
-    }
-  };
-
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
     setIsDragging(true);
@@ -65,60 +101,47 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onUpload }) => {
     event.preventDefault();
     setIsDragging(false);
     const file = event.dataTransfer.files?.[0];
-    if (file && (file.type === "text/plain" || file.type === "application/pdf")) {
+    if (file && (file.type === "text/plain" || file.type === "application/pdf" || file.type === "application/msword" || file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document")) {
       await processFile(file);
     }
-  }, []);
+  }, [onUpload]);
 
   return (
-    <div className="max-w-4xl mx-auto text-center px-4">
-      <h1 className="text-4xl font-bold text-slate-800 tracking-tight">Build Your Best Resume</h1>
-      <p className="mt-3 text-lg text-slate-600 max-w-2xl mx-auto">
-        Let our AI instantly parse your resume and help you apply professional, ATS-friendly templates.
-      </p>
-      
-      <div 
-        className={`mt-10 grid gap-8 transition-all duration-300 ${resumeText ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 items-start'}`}
-      >
-        <div className={`transition-all duration-300 ${resumeText ? 'opacity-50 max-h-40' : 'opacity-100'}`}>
-          <h2 className="text-lg font-semibold text-slate-700 mb-2">1. Upload a File</h2>
-          <label 
-            htmlFor="file-upload" 
-            onDragOver={onDragOver}
-            onDragLeave={onDragLeave}
-            onDrop={onDrop}
-            className={`relative block w-full rounded-lg border-2 border-dashed p-8 text-center cursor-pointer transition-colors ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-slate-300 hover:border-slate-400'}`}
-          >
-            <UploadIcon className="mx-auto h-10 w-10 text-slate-400" />
-            <span className="mt-2 block text-sm font-medium text-slate-700">
-              {isProcessingFile ? `Processing ${fileName}...` : `Drag & drop or click to upload`}
-            </span>
-             <p className="text-xs text-slate-500">PDF or TXT</p>
-            <input id="file-upload" name="file-upload" type="file" className="sr-only" accept=".txt,.pdf" onChange={handleFileChange} disabled={isProcessingFile} />
-          </label>
+    <div className="flex flex-col min-h-screen">
+      <div className="flex-grow max-w-4xl mx-auto text-center px-4 py-20 flex flex-col items-center justify-center">
+        <div className="mb-4 text-teal-400">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 pilot-logo-animated" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+          </svg>
         </div>
-        <div className={`transition-all duration-300 ${resumeText ? 'row-start-1' : ''}`}>
-           <h2 className="text-lg font-semibold text-slate-700 mb-2">{resumeText ? '2. Review Your Text' : 'Or Paste Text'}</h2>
-           <textarea
-              value={resumeText}
-              onChange={(e) => setResumeText(e.target.value)}
-              placeholder="You can also paste your resume content here..."
-              className="w-full h-40 p-4 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition duration-150 ease-in-out"
-              readOnly={isProcessingFile}
-            />
-            {fileName && !isProcessingFile && <p className="text-xs text-slate-500 mt-1 text-left">Extracted content from: {fileName}</p>}
-        </div>
-      </div>
+        <h1 className="text-5xl font-bold text-gray-100 tracking-tight">Engage Your AI Career Pilot</h1>
+        <p className="mt-4 text-lg text-gray-400 max-w-2xl mx-auto h-14">
+          <span>{displayedText}</span>
+          <span className="typing-cursor"></span>
+        </p>
         
-      <div className="mt-10">
-        <button
-          onClick={handleParse}
-          disabled={!resumeText.trim() || isProcessingFile}
-          className="px-8 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 shadow-lg shadow-blue-500/30 transform hover:scale-105 transition-transform"
+        <div 
+          className="mt-12 w-full max-w-lg"
         >
-          {isProcessingFile ? 'Analyzing...' : 'Build My Resume'}
-        </button>
+            <label 
+              htmlFor="file-upload" 
+              onDragOver={onDragOver}
+              onDragLeave={onDragLeave}
+              onDrop={onDrop}
+              className={`relative block w-full rounded-xl border-2 border-dashed p-12 text-center cursor-pointer transition-all duration-300 ease-in-out ${isDragging ? 'border-teal-400 bg-gray-800/50 scale-105' : 'border-gray-600 hover:border-gray-500'}`}
+            >
+              <UploadIcon className="mx-auto h-12 w-12 text-gray-500" />
+              <span className="mt-4 block font-medium text-gray-300">
+                {isProcessingFile ? `Processing ${fileName}...` : `Drag & drop or click to upload`}
+              </span>
+              <p className="text-sm text-gray-500">PDF, DOCX, or TXT</p>
+              <input id="file-upload" name="file-upload" type="file" className="sr-only" accept=".txt,.pdf,.doc,.docx" onChange={handleFileChange} disabled={isProcessingFile} />
+            </label>
+        </div>
       </div>
+      <footer className="w-full text-center py-4">
+          <p className="text-xs text-gray-500">Designed by Himalayan Coder</p>
+      </footer>
     </div>
   );
 };

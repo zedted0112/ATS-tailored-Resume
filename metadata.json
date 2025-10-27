@@ -1,5 +1,6 @@
 {
-  "name": "ATS Resume Builder",
-  "description": "Upload your resume, let AI structure it, and apply professional, ATS-friendly templates. Edit your details in real-time and see a live preview before printing your perfect resume.",
-  "requestFramePermissions": []
+  "name": "AI Career Pilot",
+  "description": "Engage your personal AI Career Pilot to analyze your resume, prepare for interviews, and tailor your application for any job. Navigate your career path with intelligent guidance.",
+  "requestFramePermissions": [],
+  "author": "Himalayan Coder™️"
 }

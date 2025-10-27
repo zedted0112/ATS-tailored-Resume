@@ -1,7 +1,3 @@
-
-
-
-
 import React from 'react';
 import type { ResumeData, ResumeSection } from '../../types';
 import { TemplateProps } from '../ResumePreview';

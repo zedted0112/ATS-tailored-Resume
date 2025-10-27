@@ -1,7 +1,3 @@
-
-
-
-
 import React from 'react';
 import type { ResumeData, ResumeSection } from '../../types';
 import { TemplateProps } from '../ResumePreview';
@@ -52,14 +48,12 @@ const TemplateModern: React.FC<TemplateProps> = ({ data, setData, isEditing }) =
     <div className="font-sans text-gray-800 bg-white p-2">
       <header className="text-center mb-6">
         <EditableField as="h1" isEditing={isEditing} value={personalInfo.name} onSave={val => handleUpdate(p => ({ personalInfo: { ...p.personalInfo, name: val } }))} className="text-4xl font-bold text-gray-900 tracking-tight" />
-        <div className="flex justify-center items-center space-x-4 mt-2 text-sm text-gray-600">
+        <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-1 mt-2 text-sm text-gray-600">
            <EditableField as="span" isEditing={isEditing} value={personalInfo.location} onSave={val => handleUpdate(p => ({ personalInfo: { ...p.personalInfo, location: val } }))} />
-          <span>&bull;</span>
           <EditableField as="span" isEditing={isEditing} value={personalInfo.email} onSave={val => handleUpdate(p => ({ personalInfo: { ...p.personalInfo, email: val } }))} className="text-indigo-600 hover:underline" />
-          <span>&bull;</span>
           <EditableField as="span" isEditing={isEditing} value={personalInfo.phone} onSave={val => handleUpdate(p => ({ personalInfo: { ...p.personalInfo, phone: val } }))} />
-          {personalInfo.linkedin && <><span>&bull;</span><EditableField as="span" isEditing={isEditing} value={personalInfo.linkedin} onSave={val => handleUpdate(p => ({ personalInfo: { ...p.personalInfo, linkedin: val } }))} className="text-indigo-600 hover:underline" /></>}
-          {personalInfo.github && <><span>&bull;</span><EditableField as="span" isEditing={isEditing} value={personalInfo.github} onSave={val => handleUpdate(p => ({ personalInfo: { ...p.personalInfo, github: val } }))} className="text-indigo-600 hover:underline" /></>}
+          {personalInfo.linkedin && <EditableField as="span" isEditing={isEditing} value={personalInfo.linkedin} onSave={val => handleUpdate(p => ({ personalInfo: { ...p.personalInfo, linkedin: val } }))} className="text-indigo-600 hover:underline" />}
+          {personalInfo.github && <EditableField as="span" isEditing={isEditing} value={personalInfo.github} onSave={val => handleUpdate(p => ({ personalInfo: { ...p.personalInfo, github: val } }))} className="text-indigo-600 hover:underline" />}
         </div>
       </header>
 

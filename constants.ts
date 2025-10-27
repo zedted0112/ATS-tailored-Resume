@@ -1,4 +1,3 @@
-
 import type { ResumeData } from './types';
 
 export const initialResumeData: ResumeData = {
@@ -43,7 +42,8 @@ export const initialResumeData: ResumeData = {
       institution: "University of California, Berkeley",
       degree: "B.S. in Computer Science",
       location: "Berkeley, CA",
-      graduationDate: "May 2018"
+      graduationDate: "May 2018",
+      cgpa: "3.9/4.0"
     }
   ],
   skills: [
@@ -52,6 +52,8 @@ export const initialResumeData: ResumeData = {
   projects: [
       {
           name: "Project Portfolio Website",
+          role: "Lead Developer",
+          date: "Fall 2023",
           description: [
               "Built a personal portfolio website to showcase my projects and skills.",
               "Developed with Next.js for server-side rendering and static site generation.",
@@ -60,6 +62,16 @@ export const initialResumeData: ResumeData = {
           technologies: ["Next.js", "React", "Tailwind CSS", "Vercel"],
           link: "github.com/janedoe/portfolio"
       }
+  ],
+  coursework: [
+      "Data Structures and Algorithms",
+      "Object Oriented Programming",
+      "Database Management Systems",
+      "Operating Systems"
+  ],
+  certifications: [
+      { name: "AWS Certified Cloud Practitioner", date: "Oct 2023" },
+      { name: "Google Professional Data Engineer", date: "Jan 2024" }
   ],
   hiddenSections: []
 };
